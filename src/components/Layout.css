@@ -5,6 +5,7 @@
 }
 
 .main-content {
+  flex-grow: 1;
   flex: 1; /* This pushes the footer to the bottom */
   padding: 1rem; /* Optional spacing */
   overflow-x: hidden;

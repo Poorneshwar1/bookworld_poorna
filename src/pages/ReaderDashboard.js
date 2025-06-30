@@ -7,10 +7,13 @@ const ReaderDashboard = () => {
   const [books, setBooks] = useState([]);
   const [search, setSearch] = useState("");
   const [accessibleBookIds, setAccessibleBookIds] = useState([]);
+  const [cartBookIds, setCartBookIds] = useState([]);
+
 
   useEffect(() => {
     fetchBooks();
     fetchAccessibleBooks();
+    fetchCart();
   }, []);
 
   const fetchBooks = async () => {
@@ -31,6 +34,16 @@ const ReaderDashboard = () => {
     }
   };
 
+  const fetchCart = async () => {
+  try {
+    const res = await axiosInstance.get("/books/cart");
+    setCartBookIds(res.data); // should be array of bookIds
+  } catch (err) {
+    console.error("Failed to fetch cart");
+  }
+};
+
+
   const handleSearch = async () => {
     try {
       const res = await axiosInstance.get(`/books/search?title=${search}`);
@@ -39,6 +52,18 @@ const ReaderDashboard = () => {
       alert("Book not found");
     }
   };
+
+
+  const handleAddToCart = async (bookId) => {
+  try {
+    await axiosInstance.post(`/books/cart/add/${bookId}`);
+    setCartBookIds((prev) => [...prev, bookId]);
+    window.dispatchEvent(new Event("cartUpdated"));
+  } catch (err) {
+    alert("Failed to add to cart");
+  }
+};
+
 
   const handlePayment = async (bookId) => {
   try {
@@ -126,13 +151,24 @@ const ReaderDashboard = () => {
           {accessibleBookIds.includes(book.bookId) ? (
             <button className="purchased-btn">Purchased</button>
           ) : (
-            <button
-              className="buy-btn"
-              onClick={() => handlePayment(book.bookId)}
-            >
-              Buy
-            </button>
+            <>
+              <button
+                className="buy-btn"
+                onClick={() => handlePayment(book.bookId)}
+              >
+                Buy Now
+              </button>
+
+              <button
+                className={`cart-btn ${cartBookIds.includes(book.bookId) ? 'disabled' : ''}`}
+                onClick={() => handleAddToCart(book.bookId)}
+                disabled={cartBookIds.includes(book.bookId)}
+              >
+                {cartBookIds.includes(book.bookId) ? 'Added to Cart' : 'Add to Cart'}
+              </button>
+            </>
           )}
+
           <button
             className="read-btn"
             onClick={() => handleRead(book.bookId)}
@@ -140,6 +176,7 @@ const ReaderDashboard = () => {
             Read
           </button>
         </div>
+
       </div>
     ))}
   </div>

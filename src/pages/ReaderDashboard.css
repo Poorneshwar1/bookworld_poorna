@@ -101,3 +101,13 @@
   color: #555;
   cursor: default;
 }
+
+.book-card .cart-btn {
+  background-color: #ffc107;
+  color: #333;
+}
+
+.book-card .cart-btn.disabled {
+  background-color: #e0a800;
+  cursor: not-allowed;
+}
