@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 const Register = () => {
   const [form, setForm] = useState({ name: "", email: "", password: "", roles: ["READER"] });
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -15,8 +16,36 @@ const Register = () => {
     setForm((prev) => ({ ...prev, roles: [e.target.value] }));
   };
 
+  const validateForm = () => {
+    const { name, password } = form;
+
+    if (name.trim().length < 4) {
+      setError("Name must be at least 4 characters long.");
+      return false;
+    }
+
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters long.");
+      return false;
+    }
+
+    const hasNumber = /\d/.test(password);
+    const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+    if (!hasNumber || !hasSpecial) {
+      setError("Password must contain at least one number and one special character.");
+      return false;
+    }
+
+    setError(""); // Clear error if all validations pass
+    return true;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!validateForm()) return;
+
     try {
       await axiosInstance.post("/api/auth/register", form);
       alert("Registration successful!");
@@ -26,7 +55,6 @@ const Register = () => {
     }
   };
 
-
   return (
     <div className="container mt-5">
       <div className="row justify-content-center">
@@ -35,6 +63,7 @@ const Register = () => {
             <div className="card-body">
               <h3 className="card-title text-center mb-4">Register</h3>
               <form onSubmit={handleSubmit}>
+                {error && <div className="alert alert-danger">{error}</div>}
                 <div className="mb-3">
                   <label className="form-label">Name</label>
                   <input
